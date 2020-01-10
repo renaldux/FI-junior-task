@@ -1,6 +1,12 @@
-# Fast Invest junior task
+# FI junior task
 
 Based on Laravel 5.8
+
+## Requirements
+
+- Laravel 5.8
+- PHP >= 7.1
+
 
 ## Installation
 
