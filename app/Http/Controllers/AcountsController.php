@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use App\Account;
 use App\Transfer;
 use Illuminate\Http\Request;
@@ -84,19 +85,21 @@ use mysql_xdevapi\Exception;
                 return redirect()->route('transfer')->withErrors(['Not sufficient balance']);
             }
 
-            $user_id = Auth::id();
             $current_acount_increment = $request->input('recipientAccount');
             $current_acount_decrement = $request->input('payer_account');
             $amount = $request->input('amount');
 
-            // change balance MY ACCOUNT
-            Account::find($user_id)
-                ->where('account_no', $current_acount_decrement)
-                ->decrement('balance',$request->input('amount'));
 
-            // change balance RECIPIENT's ACCOUNT
-            Account::where('account_no', $current_acount_increment)
-                ->increment('balance',$request->input('amount'));
+            DB::transaction(function () use ($request) {
+                // change balance MY ACCOUNT
+                Account::where('account_no', $request->input('payer_account'))
+                    ->decrement('balance',$request->input('amount'));
+
+                // change balance RECIPIENT's ACCOUNT
+                Account::where('account_no', $request->input('recipientAccount'))
+                    ->increment('balance',$request->input('amount'));
+            });
+
 
             //            Transfer Model instance. Saves transfers data
             $transfer = new Transfer([
