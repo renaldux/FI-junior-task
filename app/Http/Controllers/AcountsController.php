@@ -25,9 +25,6 @@ use mysql_xdevapi\Exception;
         public function getMyAccounts(Request $request)
         {
             $accounts = Account::where('user_id', Auth::id())->get();
-            if (!$accounts->count()) {
-                return redirect()->route('newAccount');
-            }
             return view('dashboard', ['accounts' => $accounts]);
         }
 

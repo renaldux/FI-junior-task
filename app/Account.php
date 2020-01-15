@@ -23,14 +23,15 @@ class Account extends Model
     }
 
     /**
+     * @return bool|void
      * @throws \Exception
      */
     public function createNewAccount()
     {
         if (!Auth::check()) {
-            return;
+            throw new \Exception('trying to create account when not logged in');
         }
-        $this->setAttribute('user_id', Auth::user()->id);
+        $this->setAttribute('user_id', Auth::id());
         $this->setAttribute('balance', $this->newAccountBalance());
         $this->setAttribute('account_no', $this->generateUniqueAccountNo());
         return $this->save();
@@ -60,11 +61,16 @@ class Account extends Model
 
     /**
      * Checks if account exists and returns amount for account to be created
+     * @param null $user
      * @return int
+     * @throws \Exception
      */
     // First account  - bonus 1000 Eur
-    private function newAccountBalance(): int
+    private function newAccountBalance($user = null): int
     {
+        if (!Auth::check()) {
+            throw new \Exception('checking newAccountBalance when not logged in');
+        }
         $accountAllreadyExists = self::where('user_id', Auth::id())->first();
         return $accountAllreadyExists ? 0 : (int) env('ACCONT_BONUS_AMOUNT', 100);
     }

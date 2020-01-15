@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Account;
+use App\Exceptions\AccountCreateException;
 use App\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
@@ -68,6 +73,18 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+    protected function registered(Request $request, $user)
+    {
+        if (!Auth::check()) {
+            Auth::login($user);
+        }
+        try {
+            (new Account())->createNewAccount();
+        } catch (\Exception $e) {
+            Log::info('po registracijos nepavyko sukurto accounto', $e->getTraceAsString());
+        }
     }
 
 }
