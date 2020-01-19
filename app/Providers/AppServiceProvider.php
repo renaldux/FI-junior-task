@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Services\Contracts\MoneyTransferDataInterface;
+use App\Services\Contracts\MoneyTransferInterface;
+use App\Services\MoneyTransferDataService;
+use App\Services\MoneyTransferService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
@@ -17,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
     }
+
+    public $bindings = [
+        MoneyTransferDataInterface::class => MoneyTransferDataService::class,
+        MoneyTransferInterface::class => MoneyTransferService::class,
+    ];
 
     /**
      * Bootstrap any application services.

@@ -65,13 +65,12 @@ class Account extends Model
      * @return int
      * @throws \Exception
      */
-    // First account  - bonus 1000 Eur
     private function newAccountBalance($user = null): int
     {
         if (!Auth::check()) {
             throw new \Exception('checking newAccountBalance when not logged in');
         }
         $accountAllreadyExists = self::where('user_id', Auth::id())->first();
-        return $accountAllreadyExists ? 0 : (int) env('ACCONT_BONUS_AMOUNT', 100);
+        return $accountAllreadyExists ? 0 : (int) config('app.account_bonus');
     }
 }

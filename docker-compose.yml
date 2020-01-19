@@ -1,0 +1,59 @@
+version: "3.1"
+
+services:
+  # database
+  db:
+    image: mysql:5.7
+    volumes:
+      - ./storage/mysqldata:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: fijunior
+      MYSQL_USER: app-user
+      MYSQL_PASSWORD: app-pass
+      TZ: Europe/Vilnius
+    networks:
+      - local-net
+    container_name: db
+  # php app
+  php:
+    build:
+      context: ./docker
+      dockerfile: php.dockerfile
+      args:
+        DEVELOPMENT: 1
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - local-net
+    container_name: php
+    restart: always
+  # nginx web server
+  web:
+    build:
+      context: ./docker
+      dockerfile: web.dockerfile
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - 80:80
+    networks:
+      - local-net
+    container_name: web
+    restart: always
+  # database manager
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - local-net
+    container_name: adminer
+
+networks:
+  local-net:
+    driver: "bridge"

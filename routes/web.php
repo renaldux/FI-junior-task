@@ -13,21 +13,22 @@
 
 Route::get('/', function (){
     return view('home');
-});
+})->middleware('guest');
 
-Route::get('/myaccounts', function (){
-    return view('myaccounts');
-});
 
-Route::get('/transfer', 'AcountsController@myAccounts')->name('transfer');
+/**
+ * Accounts routes
+ */
+Route::get('/dashboard', 'AcountsController@dashboard')->name('dashboard');
+Route::get('/create-account', 'AcountsController@create')->name('newAccount');
+Route::get('/transfer', 'AcountsController@transfer')->name('transfer');
 
-Route::post('submittransfer', 'AcountsController@transferAction');
 
-Route::get('/mytransfers', 'TransfersController@getTransfers');
-
-Route::get('/dashboard', 'AcountsController@getMyAccounts')->name('dashboard');
-
-Route::get('/new-account', 'AcountsController@newAccount')->name('newAccount');
+/**
+ * Transfer routes
+ */
+Route::get('/my-transfers', 'TransfersController@getTransfers')->name('myTransfers');
+Route::post('/submit-transfer', 'TransfersController@submitTransfer')->name('submitTransfer');
 
 Auth::routes();
 

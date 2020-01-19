@@ -3,11 +3,11 @@
 @section('content')
     <h1>TRANSFER TO</h1>
 
-    {!! Form::open(['url' => 'submittransfer']) !!}
+    {!! Form::open(['url' => route('submitTransfer')]) !!}
 
     <div class="form-group">
         {{ Form::label('payerAccount', 'Payer account') }}
-        <select name="payer_account" class="form-control">
+        <select name="payerAccount" class="form-control">
             @foreach($accounts as $account)
                 <option value="{{ $account}}" >{{ $account}}</option>
             @endforeach

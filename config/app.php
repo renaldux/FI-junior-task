@@ -123,6 +123,8 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
+    'account_bonus' => env('ACCONT_BONUS_AMOUNT', 1000),
+
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers

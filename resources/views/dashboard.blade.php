@@ -19,10 +19,10 @@
                             <a class="navbar-brand" href="{{ route('newAccount') }}">
                                 Create account
                             </a>
-                            <a class="navbar-brand" href="{{ url('/transfer') }}">
+                            <a class="navbar-brand" href="{{ route('transfer') }}">
                                 New transfer
                             </a>
-                            <a class="navbar-brand" href="{{ url('/mytransfers') }}">
+                            <a class="navbar-brand" href="{{ route('myTransfers') }}">
                                 My transfers
                             </a>
                         </nav>

@@ -7,9 +7,9 @@ use App\Account;
 use App\Transfer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use mysql_xdevapi\Exception;
+use Illuminate\Support\Facades\Log;
 
-    class AcountsController extends Controller
+class AcountsController extends Controller
     {
 
         public function __construct()
@@ -22,7 +22,7 @@ use mysql_xdevapi\Exception;
          * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
          * @throws \Exception
          */
-        public function getMyAccounts(Request $request)
+        public function dashboard(Request $request)
         {
             $accounts = Account::where('user_id', Auth::id())->get();
             return view('dashboard', ['accounts' => $accounts]);
@@ -31,85 +31,29 @@ use mysql_xdevapi\Exception;
         /**
          * @param Request $request
          * @return \Illuminate\Http\RedirectResponse
-         * @throws \Exception
          */
-        public function newAccount(Request $request)
+        public function create(Request $request)
         {
-            $account = new Account();
-            $account->createNewAccount();
+            try {
+                $account = new Account();
+                $account->createNewAccount();
+            } catch (\Exception $e) {
+                Log::error($e->getTraceAsString());
+                return redirect()->route('dashboard')->withErrors([$e->getMessage()]);
+            }
             return redirect()->route('dashboard');
         }
 
 
         /**
-         * creates user account
-         * @param Request $request
-         * @return string
+         * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
          */
-        public function create(Request $request): ?string
-        {
-            if (!Auth::check()) {
-                return 'neesate prisijunges';
-            }
-
-            Account::create([
-                'user_id' => Auth::user()->id,
-                'balance' => env('ACCONT_BONUS_AMOUNT', 1000)
-            ]);
-        }
-
-        public function myAccounts()
+        public function transfer()
         {
             $accounts_info = Account::where('user_id', Auth::id())->get();
             $accounts_numbers = $accounts_info->pluck('account_no');
             return view('transfer', ['accounts' => $accounts_numbers]);
         }
-
-
-        public function transferAction(Request $request)
-        {
-            $this->validate($request, [
-                'recipientAccount' => 'required',
-                'amount' => 'required'
-            ]);
-
-            $my_account = Account::where(['user_id' => Auth::id(), 'account_no' => $request->input('payer_account')])->first();
-            if (!$my_account) {
-                return redirect()->route('transfer')->withErrors(['Wrong payer account number']);
-            }
-
-            if ($my_account['balance'] < $request->input('amount')) {
-                return redirect()->route('transfer')->withErrors(['Not sufficient balance']);
-            }
-
-            $current_acount_increment = $request->input('recipientAccount');
-            $current_acount_decrement = $request->input('payer_account');
-            $amount = $request->input('amount');
-
-
-            DB::transaction(function () use ($request) {
-                // change balance MY ACCOUNT
-                Account::where('account_no', $request->input('payer_account'))
-                    ->decrement('balance',$request->input('amount'));
-
-                // change balance RECIPIENT's ACCOUNT
-                Account::where('account_no', $request->input('recipientAccount'))
-                    ->increment('balance',$request->input('amount'));
-            });
-
-
-            //            Transfer Model instance. Saves transfers data
-            $transfer = new Transfer([
-                'user_id' => Auth::user()->id,
-                'payer_account_no' => $current_acount_decrement,
-                'recipient_account_no' => $current_acount_increment,
-                'amount' => $amount
-            ]);
-            $transfer->save();
-
-            return redirect('/dashboard');
-        }
-
     }
 
 
