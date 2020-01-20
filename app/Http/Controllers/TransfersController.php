@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MoneyTransferRequest;
 use App\Services\Contracts\MoneyTransferDataInterface;
 use App\Services\Contracts\MoneyTransferInterface;
 use App\Services\MoneyTransferService;
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use App\Transfer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -39,24 +40,18 @@ class TransfersController extends Controller
     }
 
     /**
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     * @throws \Illuminate\Validation\ValidationException
+     * @param MoneyTransferRequest $request
+     * @return RedirectResponse|\Illuminate\Routing\Redirector
      */
-    public function submitTransfer(Request $request)
+    public function submitTransfer(MoneyTransferRequest $request)
     {
-        $this->validate($request, [
-            'payerAccount' => 'required|min:6|max:22',
-            'recipientAccount' => 'required',
-            'amount' => 'required|numeric|min:1'
-        ]);
-
         try {
-            $transferData = resolve(MoneyTransferDataInterface::class)->setDataArray($request->all());
+            $data = $request->validated() + ['payerId' => Auth::id()];
+            $transferData = resolve(MoneyTransferDataInterface::class)->setDataArray($data);
             resolve(MoneyTransferInterface::class)->transferMoney($transferData);
         } catch (\Exception $e) {
             Log::error($e->getTraceAsString());
-            return redirect()->route('dashboard')->withErrors([$e->getMessage()]);
+            return redirect()->route('transfer')->withErrors([$e->getMessage()])->withInput();
         }
 
         return redirect()->route('myTransfers');

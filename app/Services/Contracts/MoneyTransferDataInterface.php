@@ -30,5 +30,12 @@ interface MoneyTransferDataInterface
      * @throws \Exception
      * @return int
      */
+
     public function getAmount(): int;
+
+    /**
+     * @throws \Exception
+     * @return int
+     */
+    public function getPayerId(): int;
 }

@@ -17,6 +17,8 @@ class MoneyTransferDataService implements MoneyTransferDataInterface
     private $recipientAccount = null;
     /** @var int  */
     private $amount = null;
+    /** @var int  */
+    private $payerId = null;
 
     /**
      * @inheritDoc
@@ -28,13 +30,16 @@ class MoneyTransferDataService implements MoneyTransferDataInterface
             empty($data['recipientAccount']) ||
             empty($data['amount']) ||
             ! is_numeric($data['amount']) ||
-            $data <= 0
+            $data <= 0 ||
+            $data['payerAccount'] == $data['recipientAccount'] ||
+            empty($data['payerId'])
         ) {
-            throw new \Exception('required data not defined');
+            throw new \Exception('required data not defined or invalid');
         }
         $this->payerAccount = $data['payerAccount'];
         $this->recipientAccount = $data['recipientAccount'];
         $this->amount = (int) $data['amount'];
+        $this->payerId = $data['payerId'];
 
         return $this;
     }
@@ -73,5 +78,16 @@ class MoneyTransferDataService implements MoneyTransferDataInterface
             throw new \Exception('amount not defined');
         }
         return $this->amount;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getPayerId(): int
+    {
+        if (empty($this->payerId)) {
+            throw new \Exception('payer id not defined');
+        }
+        return $this->payerId;
     }
 }

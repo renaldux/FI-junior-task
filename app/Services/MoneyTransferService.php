@@ -8,7 +8,6 @@ use App\Account;
 use App\Services\Contracts\MoneyTransferDataInterface;
 use App\Services\Contracts\MoneyTransferInterface;
 use App\Transfer;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class MoneyTransferService implements MoneyTransferInterface
@@ -21,12 +20,6 @@ class MoneyTransferService implements MoneyTransferInterface
      */
     public function transferMoney(MoneyTransferDataInterface $data):bool
     {
-        if (!Auth::check()) {
-            throw new \Exception('unauthenticated');
-        }
-
-        $this->checkPayerAccount($data);
-
         DB::transaction(function () use ($data) {
             // change balance MY ACCOUNT
             Account::where('account_no', $data->getPayerAccount())
@@ -37,7 +30,7 @@ class MoneyTransferService implements MoneyTransferInterface
                 ->increment('balance', $data->getAmount());
 
             $transfer = new Transfer([
-                'user_id' => Auth::id(),
+                'user_id' => $data->getPayerId(),
                 'payer_account_no' => $data->getPayerAccount(),
                 'recipient_account_no' => $data->getRecipientAccount(),
                 'amount' => $data->getAmount()
@@ -49,12 +42,12 @@ class MoneyTransferService implements MoneyTransferInterface
 
 
     /**
+     * @param Account $payerAccount
      * @param MoneyTransferDataInterface $data
      * @throws \Exception
      */
-    private function checkPayerAccount(MoneyTransferDataInterface $data)
+    private function checkPayerAccount(Account $payerAccount, MoneyTransferDataInterface $data)
     {
-        $payerAccount = $this->getPayerAccount($data);
         if (empty($payerAccount)) {
             throw new \Exception('Wrong payer account number');
         }
@@ -72,7 +65,7 @@ class MoneyTransferService implements MoneyTransferInterface
     private function getPayerAccount(MoneyTransferDataInterface $data): Account
     {
         return Account::where([
-            'user_id' => Auth::id(),
+            'user_id' => $data->getPayerId(),
             'account_no' => $data->getPayerAccount()
         ])->first();
     }

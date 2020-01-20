@@ -20,11 +20,12 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         Schema::defaultStringLength(191);
+
+        $this->app->singleton(MoneyTransferInterface::class, MoneyTransferService::class);
     }
 
     public $bindings = [
-        MoneyTransferDataInterface::class => MoneyTransferDataService::class,
-        MoneyTransferInterface::class => MoneyTransferService::class,
+        MoneyTransferDataInterface::class => MoneyTransferDataService::class
     ];
 
     /**

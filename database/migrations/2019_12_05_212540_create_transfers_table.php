@@ -17,7 +17,7 @@ class CreateTransfersTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->bigIncrements('transfer_no');
             $table->string('payer_account_no');
-            $table->string('recipient_account_no');
+            $table->string('recipient_account_no')->index();
             $table->string('amount');
             $table->timestamps();
 
